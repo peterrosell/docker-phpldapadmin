@@ -6,7 +6,7 @@ echo $TAG
 echo $NAME
 docker run \
 	--name $NAME \
-	--link ldap:ldap \
+	--link openldap:ldap \
 	-v /site/etc/$NAME:/ext/etc \
 	-v /site/log/$NAME:/ext/log \
 	-i \

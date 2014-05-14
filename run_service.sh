@@ -4,13 +4,13 @@ source $SCRIPT_PATH/env.sh
 
 echo docker run \
 	--name $NAME \
-	--link ldap:ldap \
+	--link openldap:ldap \
 	-v /site/etc/$NAME:/ext/etc \
 	-v /site/log/$NAME:/ext/log \
 	-t $TAG
 docker run \
 	--name $NAME \
-	--link ldap:ldap \
+	--link openldap:ldap \
 	-v /site/etc/$NAME:/ext/etc \
 	-v /site/log/$NAME:/ext/log \
 	-t $TAG

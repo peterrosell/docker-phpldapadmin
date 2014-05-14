@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -eu
 
@@ -9,23 +9,36 @@ status () {
 
 set -x
 
-: LDAP_BASE=${LDAP_BASE}
+CONFIG_FILE=/etc/phpldapadmin/config.php
+OLD_CONFIG_FILE=/tmp/config.php.original
+
+#LDAP_BASE=${LDAP_BASE}
+LDAP_HOST=`echo $LDAP_PORT | sed 's/tcp\:\/\/\(.*\):\(.*\)/\1/'`
+LDAP_HOST_PORT=`echo $LDAP_PORT | sed 's/tcp\:\/\/\(.*\):\(.*\)/\2/'`
+
+set +e
+test $(grep "${LDAP_BASE}" $CONFIG_FILE | wc -l) -gt 0
+RESULT=$?
+echo $RESULT
+set -e
 
 ############ Base config ############
-if [ ! ( test $(grep "${LDAP_BASE}" config.php | wc -l) -gt 0 ) ]; then
+if [ "$RESULT" == "1" ]; then
   status "configuring php LDAP Admin"
 
-  CONFIG_FILE=/etc/phpldapadmin/config.php
-  OLD_CONFIG_FILE=/tmp/config.php.original
 
   mv ${CONFIG_FILE} ${OLD_CONFIG_FILE}
-  sed "s/dc=example,dc=com/${LDAP_BASE}/g" ${OLD_CONFIG_FILE} > ${CONFIG_FILE}
+  cat ${OLD_CONFIG_FILE} \
+  | sed "s/dc=example,dc=com/${LDAP_BASE}/g" \
+  | sed "s/\('host'.*'\)127.0.0.1/\1${LDAP_HOST}/g" \
+  | sed "s/\('port'.*'\)389/\1${LDAP_HOST_PORT}/g" \
+  > ${CONFIG_FILE}
   chown --reference=${OLD_CONFIG_FILE} $CONFIG_FILE
   chmod --reference=${OLD_CONFIG_FILE} $CONFIG_FILE
   rm ${OLD_CONFIG_FILE}
 
 else
-  status "slapd database found"
+  status "PHP Ldap Admin already configured."
 fi
 
 /etc/init.d/apache2 start
