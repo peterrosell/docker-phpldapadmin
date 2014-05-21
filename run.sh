@@ -1,11 +1,12 @@
 #!/bin/bash
-TAG=`git config --get remote.origin.url | sed 's/.*\/\(.*\/.*\)/\1/'`
-NAME=`echo $TAG | sed 's/.*\/.*-\(.?*\)/\1/'`
+SCRIPT_PATH=$(dirname `which $0`)
+source $SCRIPT_PATH/env.sh
 
 echo $TAG
 echo $NAME
 docker run \
 	--name $NAME \
+	-p 10080:80 \
 	--link openldap:ldap \
 	-v /site/etc/$NAME:/ext/etc \
 	-v /site/log/$NAME:/ext/log \
